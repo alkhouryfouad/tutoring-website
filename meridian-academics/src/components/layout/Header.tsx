@@ -66,6 +66,8 @@ export default function Header() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="md:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
           aria-label="Toggle menu"
+          aria-expanded={menuOpen}
+          aria-controls="mobile-menu"
         >
           <span
             className={`block w-6 h-0.5 bg-charcoal-900 transition-all duration-300 ${
@@ -87,6 +89,7 @@ export default function Header() {
 
       {/* Mobile menu */}
       <div
+        id="mobile-menu"
         className={`md:hidden overflow-hidden transition-all duration-300 bg-cream-100/95 backdrop-blur-md ${
           menuOpen ? "max-h-96 border-b border-cream-300" : "max-h-0"
         }`}

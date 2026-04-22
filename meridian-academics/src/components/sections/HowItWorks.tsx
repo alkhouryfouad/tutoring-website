@@ -1,5 +1,4 @@
 import FadeIn from "@/components/ui/FadeIn";
-import SectionHeading from "@/components/ui/SectionHeading";
 
 const steps = [
   {

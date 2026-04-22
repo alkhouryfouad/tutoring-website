@@ -35,7 +35,10 @@ export default function FAQ() {
             {faqs.map((faq, i) => (
               <div key={i}>
                 <button
+                  id={`faq-btn-${i}`}
                   onClick={() => toggle(i)}
+                  aria-expanded={openIndices.has(i)}
+                  aria-controls={`faq-panel-${i}`}
                   className="w-full flex items-center justify-between py-5 text-left cursor-pointer group"
                 >
                   <span className="font-semibold text-charcoal-900 pr-4 group-hover:text-forest-600 transition-colors">
@@ -45,11 +48,15 @@ export default function FAQ() {
                     className={`shrink-0 text-forest-600 text-xl transition-transform duration-200 ${
                       openIndices.has(i) ? "rotate-45" : ""
                     }`}
+                    aria-hidden="true"
                   >
                     +
                   </span>
                 </button>
                 <div
+                  id={`faq-panel-${i}`}
+                  role="region"
+                  aria-labelledby={`faq-btn-${i}`}
                   className={`overflow-hidden transition-all duration-300 ${
                     openIndices.has(i)
                       ? "max-h-96 pb-5 opacity-100"

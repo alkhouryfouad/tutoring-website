@@ -4,8 +4,7 @@ import { useForm, ValidationError } from "@formspree/react";
 import FadeIn from "@/components/ui/FadeIn";
 import SectionHeading from "@/components/ui/SectionHeading";
 
-// Formspree endpoint — connected to Fouad's account
-const FORMSPREE_ID = "mdappgoo";
+const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID ?? "mdappgoo";
 
 const inputStyles =
   "w-full rounded-lg border border-cream-300 bg-white px-4 py-3 text-sm text-charcoal-900 placeholder:text-charcoal-700/50 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-shadow";
@@ -64,7 +63,20 @@ export default function Contact() {
             onSubmit={handleSubmit}
             className="bg-white border border-cream-300 rounded-2xl p-8 md:p-10 space-y-6"
           >
-            {state.errors && (
+            {/* Honeypot — hidden from humans, filled by bots; Formspree discards submissions with this set */}
+            <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+              <label htmlFor="_gotcha">Leave this blank</label>
+              <input
+                id="_gotcha"
+                type="text"
+                name="_gotcha"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
+
+            {/* Only show banner when there are actual errors after a submission attempt */}
+            {state.errors !== null && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
                 Something went wrong. Please try again.
               </div>
@@ -80,6 +92,7 @@ export default function Contact() {
                 type="text"
                 name="studentName"
                 required
+                autoComplete="given-name"
                 className={inputStyles}
                 placeholder="e.g. Sarah"
               />
@@ -173,6 +186,7 @@ export default function Contact() {
                 type="text"
                 name="parentName"
                 required
+                autoComplete="name"
                 className={inputStyles}
                 placeholder="Full name"
               />
@@ -190,6 +204,7 @@ export default function Contact() {
                   type="email"
                   name="parentEmail"
                   required
+                  autoComplete="email"
                   className={inputStyles}
                   placeholder="email@example.com"
                 />
@@ -204,6 +219,9 @@ export default function Contact() {
                   type="tel"
                   name="parentPhone"
                   required
+                  autoComplete="tel"
+                  pattern="[\+]?[\d\s\-\(\)]{7,20}"
+                  title="Please enter a valid phone number"
                   className={inputStyles}
                   placeholder="(905) 000-0000"
                 />

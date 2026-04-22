@@ -9,7 +9,7 @@ import GradeTabs from "@/components/ui/GradeTabs";
 export default function Subjects() {
   const [activeGrade, setActiveGrade] = useState("12");
 
-  const activeGroup = grades.find((g) => g.grade === activeGrade)!;
+  const activeGroup = grades.find((g) => g.grade === activeGrade) ?? grades[0];
 
   return (
     <section id="subjects" className="py-20 md:py-28">
