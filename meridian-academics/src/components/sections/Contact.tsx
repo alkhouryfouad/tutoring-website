@@ -1,19 +1,86 @@
 "use client";
 
-import { useForm, ValidationError } from "@formspree/react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import FadeIn from "@/components/ui/FadeIn";
 import SectionHeading from "@/components/ui/SectionHeading";
-
-const FORMSPREE_ID = process.env.NEXT_PUBLIC_FORMSPREE_ID ?? "mdappgoo";
 
 const inputStyles =
   "w-full rounded-lg border border-cream-300 bg-white px-4 py-3 text-sm text-charcoal-900 placeholder:text-charcoal-700/50 focus:outline-none focus:ring-2 focus:ring-forest-500 focus:border-transparent transition-shadow";
 const labelStyles = "block text-sm font-medium text-charcoal-900 mb-1.5";
 
-export default function Contact() {
-  const [state, handleSubmit] = useForm(FORMSPREE_ID);
+interface FormFields {
+  studentName: string;
+  grade: string;
+  subjects: string;
+  sessionFormat: string;
+  preferredTimes: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  notes: string;
+}
 
-  if (state.succeeded) {
+const EMPTY: FormFields = {
+  studentName: "",
+  grade: "",
+  subjects: "",
+  sessionFormat: "",
+  preferredTimes: "",
+  parentName: "",
+  parentEmail: "",
+  parentPhone: "",
+  notes: "",
+};
+
+type Status = "idle" | "submitting" | "success" | "error";
+
+export default function Contact() {
+  const [fields, setFields] = useState<FormFields>(EMPTY);
+  const [honeypot, setHoneypot] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+
+  const set = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFields((prev) => ({ ...prev, [name]: value }));
+    setFieldErrors((prev) => ({ ...prev, [name]: "" }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (honeypot) {
+      // Bot filled the honeypot — silently succeed
+      setStatus("success");
+      return;
+    }
+
+    setStatus("submitting");
+    setErrorMsg("");
+    setFieldErrors({});
+
+    try {
+      const res = await fetch("/api/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(fields),
+      });
+
+      if (res.ok) {
+        setStatus("success");
+      } else {
+        const data = await res.json();
+        if (data.fields) setFieldErrors(data.fields);
+        setErrorMsg(data.error ?? "Something went wrong. Please try again.");
+        setStatus("error");
+      }
+    } catch {
+      setErrorMsg("Network error. Please check your connection and try again.");
+      setStatus("error");
+    }
+  };
+
+  if (status === "success") {
     return (
       <section id="contact" className="py-20 md:py-28 bg-cream-50">
         <div className="max-w-2xl mx-auto px-6 text-center">
@@ -27,19 +94,12 @@ export default function Contact() {
                   stroke="currentColor"
                   strokeWidth={2}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-2xl font-semibold text-charcoal-900 mb-3">
-                Thanks!
-              </h2>
+              <h2 className="text-2xl font-semibold text-charcoal-900 mb-3">Thanks!</h2>
               <p className="text-charcoal-700 leading-relaxed">
-                We&rsquo;ll reach out within 24 hours to schedule your free
-                consultation.
+                We&rsquo;ll reach out within 24 hours to schedule your free consultation.
               </p>
             </div>
           </FadeIn>
@@ -63,22 +123,26 @@ export default function Contact() {
             onSubmit={handleSubmit}
             className="bg-white border border-cream-300 rounded-2xl p-8 md:p-10 space-y-6"
           >
-            {/* Honeypot — hidden from humans, filled by bots; Formspree discards submissions with this set */}
-            <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}>
+            {/* Honeypot — hidden from humans, filled by bots */}
+            <div
+              aria-hidden="true"
+              style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", overflow: "hidden" }}
+            >
               <label htmlFor="_gotcha">Leave this blank</label>
               <input
                 id="_gotcha"
                 type="text"
                 name="_gotcha"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
                 tabIndex={-1}
                 autoComplete="off"
               />
             </div>
 
-            {/* Only show banner when there are actual errors after a submission attempt */}
-            {state.errors !== null && (
+            {status === "error" && errorMsg && (
               <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
-                Something went wrong. Please try again.
+                {errorMsg}
               </div>
             )}
 
@@ -93,10 +157,14 @@ export default function Contact() {
                 name="studentName"
                 required
                 autoComplete="given-name"
+                value={fields.studentName}
+                onChange={set}
                 className={inputStyles}
                 placeholder="e.g. Sarah"
               />
-              <ValidationError prefix="Student Name" field="studentName" errors={state.errors} />
+              {fieldErrors.studentName && (
+                <p className="mt-1 text-xs text-red-600">{fieldErrors.studentName}</p>
+              )}
             </div>
 
             {/* Grade + Subject row */}
@@ -109,8 +177,9 @@ export default function Contact() {
                   id="grade"
                   name="grade"
                   required
+                  value={fields.grade}
+                  onChange={set}
                   className={inputStyles}
-                  defaultValue=""
                 >
                   <option value="" disabled>
                     Select grade
@@ -120,7 +189,9 @@ export default function Contact() {
                   <option value="11">Grade 11</option>
                   <option value="12">Grade 12</option>
                 </select>
-                <ValidationError prefix="Grade" field="grade" errors={state.errors} />
+                {fieldErrors.grade && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.grade}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="subjects" className={labelStyles}>
@@ -131,10 +202,14 @@ export default function Contact() {
                   type="text"
                   name="subjects"
                   required
+                  value={fields.subjects}
+                  onChange={set}
                   className={inputStyles}
                   placeholder="e.g. MCR3U, SCH4U"
                 />
-                <ValidationError prefix="Subjects" field="subjects" errors={state.errors} />
+                {fieldErrors.subjects && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.subjects}</p>
+                )}
               </div>
             </div>
 
@@ -143,22 +218,23 @@ export default function Contact() {
               <legend className={labelStyles}>Session Format</legend>
               <div className="flex flex-wrap gap-4 mt-1">
                 {["In-Person", "Online", "Either"].map((option) => (
-                  <label
-                    key={option}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
+                  <label key={option} className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="sessionFormat"
                       value={option}
                       required
+                      checked={fields.sessionFormat === option}
+                      onChange={set}
                       className="w-4 h-4 text-forest-600 accent-forest-600"
                     />
                     <span className="text-sm text-charcoal-800">{option}</span>
                   </label>
                 ))}
               </div>
-              <ValidationError prefix="Session Format" field="sessionFormat" errors={state.errors} />
+              {fieldErrors.sessionFormat && (
+                <p className="mt-1 text-xs text-red-600">{fieldErrors.sessionFormat}</p>
+              )}
             </fieldset>
 
             {/* Preferred Days & Times */}
@@ -171,6 +247,8 @@ export default function Contact() {
                 id="preferredTimes"
                 type="text"
                 name="preferredTimes"
+                value={fields.preferredTimes}
+                onChange={set}
                 className={inputStyles}
                 placeholder="e.g. Weekday evenings, Saturday mornings"
               />
@@ -187,10 +265,14 @@ export default function Contact() {
                 name="parentName"
                 required
                 autoComplete="name"
+                value={fields.parentName}
+                onChange={set}
                 className={inputStyles}
                 placeholder="Full name"
               />
-              <ValidationError prefix="Parent Name" field="parentName" errors={state.errors} />
+              {fieldErrors.parentName && (
+                <p className="mt-1 text-xs text-red-600">{fieldErrors.parentName}</p>
+              )}
             </div>
 
             {/* Parent Email + Phone row */}
@@ -205,10 +287,14 @@ export default function Contact() {
                   name="parentEmail"
                   required
                   autoComplete="email"
+                  value={fields.parentEmail}
+                  onChange={set}
                   className={inputStyles}
                   placeholder="email@example.com"
                 />
-                <ValidationError prefix="Email" field="parentEmail" errors={state.errors} />
+                {fieldErrors.parentEmail && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.parentEmail}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="parentPhone" className={labelStyles}>
@@ -222,10 +308,14 @@ export default function Contact() {
                   autoComplete="tel"
                   pattern="[\+]?[\d\s\-\(\)]{7,20}"
                   title="Please enter a valid phone number"
+                  value={fields.parentPhone}
+                  onChange={set}
                   className={inputStyles}
                   placeholder="(905) 000-0000"
                 />
-                <ValidationError prefix="Phone" field="parentPhone" errors={state.errors} />
+                {fieldErrors.parentPhone && (
+                  <p className="mt-1 text-xs text-red-600">{fieldErrors.parentPhone}</p>
+                )}
               </div>
             </div>
 
@@ -239,6 +329,8 @@ export default function Contact() {
                 id="notes"
                 name="notes"
                 rows={4}
+                value={fields.notes}
+                onChange={set}
                 className={inputStyles}
                 placeholder="Anything else we should know — learning style, upcoming tests, specific topics, etc."
               />
@@ -247,10 +339,10 @@ export default function Contact() {
             {/* Submit */}
             <button
               type="submit"
-              disabled={state.submitting}
+              disabled={status === "submitting"}
               className="w-full rounded-lg bg-forest-600 px-6 py-3.5 text-sm font-medium text-white transition-colors hover:bg-forest-500 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
             >
-              {state.submitting ? "Sending..." : "Book My Free Consultation"}
+              {status === "submitting" ? "Sending…" : "Book My Free Consultation"}
             </button>
           </form>
         </FadeIn>
