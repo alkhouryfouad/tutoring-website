@@ -33,16 +33,21 @@ export async function verifyAdminToken(
   }
 }
 
+const PASSWORD_COMPARE_LEN = 256;
+
 export function checkAdminPassword(input: string): boolean {
   const stored = process.env.ADMIN_PASSWORD ?? "";
-  if (!stored || stored.length === 0) return false;
+  if (!stored) return false;
   try {
-    const a = Buffer.from(input.padEnd(stored.length));
-    const b = Buffer.from(stored);
-    // Constant-time comparison to prevent timing attacks
-    return (
-      a.length === b.length && timingSafeEqual(a, b)
-    );
+    // Pad both to the same fixed length so timingSafeEqual always runs on
+    // the same number of bytes regardless of input length. Without this,
+    // the early-exit length check would leak whether the guess is longer
+    // than the real password.
+    const a = Buffer.alloc(PASSWORD_COMPARE_LEN, 0);
+    const b = Buffer.alloc(PASSWORD_COMPARE_LEN, 0);
+    Buffer.from(input, "utf8").copy(a, 0, 0, PASSWORD_COMPARE_LEN);
+    Buffer.from(stored, "utf8").copy(b, 0, 0, PASSWORD_COMPARE_LEN);
+    return timingSafeEqual(a, b);
   } catch {
     return false;
   }

@@ -20,6 +20,7 @@ create table if not exists tickets (
   status          text        not null default 'new'
                               check (status in ('new','contacted','completed','archived')),
   internal_notes  text,
+  contacted_at    timestamptz,
 
   -- Timestamps
   submitted_at    timestamptz not null default now(),
@@ -47,3 +48,6 @@ create trigger set_tickets_updated_at
 -- Row Level Security: all access goes through the service-role key (server only).
 -- Anon/authenticated roles cannot read or write tickets at all.
 alter table tickets enable row level security;
+
+-- If applying to an existing database that was created without contacted_at:
+-- alter table tickets add column if not exists contacted_at timestamptz;

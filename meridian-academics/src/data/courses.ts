@@ -18,6 +18,7 @@ export const grades: GradeGroup[] = [
     courses: [
       { code: "MTH1W", name: "Mathematics", description: "Number sense, algebra, linear relations, data literacy, geometry", tags: ["in-person", "online"] },
       { code: "SNC1W", name: "Science", description: "Biology, chemistry, physics, and earth science fundamentals", tags: ["in-person", "online"] },
+      { code: "FSF1D", name: "French", description: "Reading, writing, speaking, and listening aligned with the Ontario curriculum. Taught exclusively by Murtadha.", tags: ["in-person", "online"] },
     ],
   },
   {
@@ -27,6 +28,7 @@ export const grades: GradeGroup[] = [
       { code: "MPM2D", name: "Math — Academic", description: "Quadratics, analytic geometry, trigonometry", tags: ["in-person", "online"] },
       { code: "MFM2P", name: "Math — Applied", description: "Proportional reasoning, linear systems, quadratics", tags: ["in-person", "online"] },
       { code: "SNC2D", name: "Science", description: "Tissues & organs, chemical reactions, light & optics, climate", tags: ["in-person", "online"] },
+      { code: "FSF2D", name: "French", description: "Reading, writing, speaking, and listening aligned with the Ontario curriculum. Taught exclusively by Murtadha.", tags: ["in-person", "online"] },
     ],
   },
   {
@@ -37,6 +39,7 @@ export const grades: GradeGroup[] = [
       { code: "SCH3U", name: "Chemistry", description: "Matter, solutions, gases, and chemical reactions", tags: ["in-person", "online"] },
       { code: "SPH3U", name: "Physics", description: "Kinematics, forces, energy, waves, electricity", tags: ["in-person", "online"] },
       { code: "SBI3U", name: "Biology", description: "Diversity, evolution, genetics, anatomy", tags: ["in-person", "online"] },
+      { code: "FSF3U", name: "French", description: "Reading, writing, speaking, and listening aligned with the Ontario curriculum. Taught exclusively by Murtadha.", tags: ["in-person", "online"] },
     ],
   },
   {
@@ -47,8 +50,8 @@ export const grades: GradeGroup[] = [
       { code: "MCV4U", name: "Calculus & Vectors", description: "Limits, derivatives, vectors, geometry of space", tags: ["in-person", "online"] },
       { code: "SCH4U", name: "Chemistry", description: "Organic chemistry, structure, energy changes, equilibrium, electrochemistry", tags: ["in-person", "online"] },
       { code: "SBI4U", name: "Biology", description: "Biochemistry, metabolic processes, molecular genetics, homeostasis", tags: ["in-person", "online"] },
-      { code: "MDM4U", name: "Data Management", description: "Combinatorics, probability distributions, statistics, data analysis", tags: ["in-person", "online"] },
       { code: "SPH4U", name: "Physics", description: "Dynamics, energy, gravitational/electric/magnetic fields, electromagnetic radiation, quantum mechanics", tags: ["in-person", "online"] },
+      { code: "FSF4U", name: "French", description: "Reading, writing, speaking, and listening aligned with the Ontario curriculum. Taught exclusively by Murtadha.", tags: ["in-person", "online"] },
     ],
   },
 ];

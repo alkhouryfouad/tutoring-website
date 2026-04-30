@@ -17,6 +17,7 @@ export interface Ticket {
   notes: string | null;
   status: TicketStatus;
   internal_notes: string | null;
+  contacted_at: string | null;
   submitted_at: string;
   updated_at: string;
 }
@@ -73,14 +74,17 @@ interface TicketCardProps {
 
 function TicketCard({ ticket, onUpdate }: TicketCardProps) {
   const [loading, setLoading] = useState<string | null>(null);
+  const [patchError, setPatchError] = useState("");
   const [notes, setNotes] = useState(ticket.internal_notes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
+  const [notesError, setNotesError] = useState("");
   const [expanded, setExpanded] = useState(ticket.status === "new");
 
   const patch = useCallback(
     async (payload: Record<string, unknown>, label: string) => {
       setLoading(label);
+      setPatchError("");
       try {
         const res = await fetch(`/api/admin/tickets/${ticket.id}`, {
           method: "PATCH",
@@ -90,7 +94,12 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
         if (res.ok) {
           const updated: Ticket = await res.json();
           onUpdate(updated);
+        } else {
+          const data = await res.json().catch(() => ({}));
+          setPatchError(data.error ?? "Update failed. Please try again.");
         }
+      } catch {
+        setPatchError("Network error. Please try again.");
       } finally {
         setLoading(null);
       }
@@ -101,6 +110,7 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
   const saveNotes = async () => {
     setSavingNotes(true);
     setNotesSaved(false);
+    setNotesError("");
     try {
       const res = await fetch(`/api/admin/tickets/${ticket.id}`, {
         method: "PATCH",
@@ -112,7 +122,12 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
         onUpdate(updated);
         setNotesSaved(true);
         setTimeout(() => setNotesSaved(false), 2000);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setNotesError(data.error ?? "Could not save notes.");
       }
+    } catch {
+      setNotesError("Network error. Please try again.");
     } finally {
       setSavingNotes(false);
     }
@@ -223,6 +238,7 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
               onChange={(e) => {
                 setNotes(e.target.value);
                 setNotesSaved(false);
+                setNotesError("");
               }}
               rows={3}
               placeholder="Add your follow-up notes here…"
@@ -236,6 +252,9 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
               >
                 {savingNotes ? "Saving…" : notesSaved ? "✓ Saved" : "Save notes"}
               </button>
+              {notesError && (
+                <span className="text-xs text-red-600">{notesError}</span>
+              )}
             </div>
           </div>
 
@@ -243,6 +262,13 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
           <p className="text-xs text-gray-400">
             Submitted {fullDate(ticket.submitted_at)}
           </p>
+
+          {/* Action error */}
+          {patchError && (
+            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              {patchError}
+            </p>
+          )}
 
           {/* Action buttons */}
           <div className="flex flex-wrap gap-2 pt-1">

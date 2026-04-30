@@ -11,7 +11,7 @@ export interface Testimonial {
 export const testimonials: Testimonial[] = [
   {
     quote: "I went from a 62 in Functions to an 84 on my exam. Fouad didn't just help me with the material — he taught me how to actually study for math.",
-    studentName: "Priya R.",
+    studentName: "Isabella Chirinos",
     school: "Abbey Park High School",
     grade: "Grade 11",
     subject: "MCR3U — Functions",

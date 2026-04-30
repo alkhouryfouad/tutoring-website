@@ -63,7 +63,7 @@ export default function Contact() {
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(fields),
+        body: JSON.stringify({ ...fields, _gotcha: honeypot }),
       });
 
       if (res.ok) {

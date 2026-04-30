@@ -3,8 +3,13 @@ import { jwtVerify } from "jose";
 
 const COOKIE_NAME = "ma_admin_token";
 
-function getSecret() {
+function getSecret(): Uint8Array {
   const s = process.env.ADMIN_JWT_SECRET ?? "";
+  if (!s || s.length < 32) {
+    // Return a dummy key — jwtVerify will fail, treating the request as unauthenticated.
+    // The real error is caught at login time via auth.ts's stricter getSecret().
+    return new Uint8Array(32);
+  }
   return new TextEncoder().encode(s);
 }
 
