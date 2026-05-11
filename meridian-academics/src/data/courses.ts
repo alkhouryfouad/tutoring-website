@@ -25,8 +25,7 @@ export const grades: GradeGroup[] = [
     grade: "10",
     label: "Grade 10",
     courses: [
-      { code: "MPM2D", name: "Math — Academic", description: "Quadratics, analytic geometry, trigonometry", tags: ["in-person", "online"] },
-      { code: "MFM2P", name: "Math — Applied", description: "Proportional reasoning, linear systems, quadratics", tags: ["in-person", "online"] },
+      { code: "MPM2D", name: "Math", description: "Quadratics, analytic geometry, trigonometry", tags: ["in-person", "online"] },
       { code: "SNC2D", name: "Science", description: "Tissues & organs, chemical reactions, light & optics, climate", tags: ["in-person", "online"] },
       { code: "FSF2D", name: "French", description: "Reading, writing, speaking, and listening aligned with the Ontario curriculum. Taught exclusively by Murtadha.", tags: ["in-person", "online"] },
     ],

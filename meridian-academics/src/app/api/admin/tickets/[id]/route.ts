@@ -6,7 +6,21 @@ interface RouteContext {
   params: Promise<{ id: string }>;
 }
 
+function isSameOrigin(request: NextRequest): boolean {
+  const origin = request.headers.get("origin") ?? request.headers.get("referer") ?? "";
+  if (!origin) return false;
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "").replace(/\/$/, "");
+  if (site && origin.startsWith(site)) return true;
+  if (origin.startsWith("http://localhost:")) return true;
+  return false;
+}
+
 export async function PATCH(request: NextRequest, context: RouteContext) {
+  // CSRF defense-in-depth (cookie is already SameSite=strict)
+  if (!isSameOrigin(request)) {
+    return NextResponse.json({ error: "Forbidden." }, { status: 403 });
+  }
+
   const { id } = await context.params;
 
   // Validate UUID format to prevent injection

@@ -17,7 +17,7 @@ export default function Team() {
           {tutors.map((tutor) => (
             <FadeIn key={tutor.name}>
               <div className="bg-white border border-cream-300 rounded-2xl p-8 h-full flex flex-col">
-                {/* Avatar + founder badge */}
+                {/* Avatar + name */}
                 <div className="flex items-center gap-4 mb-6">
                   <div className="w-14 h-14 rounded-full bg-forest-600 flex items-center justify-center shrink-0">
                     <span className="font-serif font-bold text-xl text-white">
@@ -25,16 +25,9 @@ export default function Team() {
                     </span>
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="text-xl font-semibold text-charcoal-900">
-                        {tutor.name}
-                      </h3>
-                      {tutor.isFounder && (
-                        <span className="inline-flex items-center rounded-full bg-amber-400/20 px-2.5 py-0.5 text-xs font-semibold text-amber-600">
-                          Founder
-                        </span>
-                      )}
-                    </div>
+                    <h3 className="text-xl font-semibold text-charcoal-900">
+                      {tutor.name}
+                    </h3>
                     <p className="text-sm text-charcoal-700">
                       {tutor.program} · {tutor.university}
                     </p>

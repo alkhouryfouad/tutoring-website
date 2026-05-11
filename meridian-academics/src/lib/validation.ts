@@ -1,14 +1,14 @@
 const VALID_GRADES = new Set(["9", "10", "11", "12"]);
 const VALID_FORMATS = new Set(["In-Person", "Online", "Either"]);
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
 const PHONE_RE = /^[\+]?[\d\s\-\(\)]{7,20}$/;
 const VALID_STATUSES = new Set(["new", "contacted", "completed", "archived"]);
 const VALID_MESSAGE_STATUSES = new Set(["new", "replied", "archived"]);
 
-/** Strip HTML tags and trim whitespace. */
+/** Strip HTML tags, CR/LF/tab (header-injection defense), and trim. */
 function sanitize(v: unknown): string {
   if (typeof v !== "string") return "";
-  return v.replace(/<[^>]*>/g, "").trim();
+  return v.replace(/<[^>]*>/g, "").replace(/[\r\n\t]/g, " ").trim();
 }
 
 export interface TicketInput {
