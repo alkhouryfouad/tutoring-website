@@ -24,11 +24,23 @@ async function isAuthenticated(request: NextRequest): Promise<boolean> {
   }
 }
 
+// Auth endpoints must be reachable without a valid cookie:
+//   login: caller is unauthenticated by definition
+//   logout: harmless when unauthenticated (the response just clears the cookie
+//   the caller already presented, if any)
+const PUBLIC_API_PATHS = new Set([
+  "/api/admin/auth/login",
+  "/api/admin/auth/logout",
+]);
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // /admin/login is always public
+  // /admin/login page is always public
   if (pathname === "/admin/login") return NextResponse.next();
+
+  // Auth API endpoints are always public
+  if (PUBLIC_API_PATHS.has(pathname)) return NextResponse.next();
 
   // All /admin/* pages require auth
   if (pathname.startsWith("/admin")) {

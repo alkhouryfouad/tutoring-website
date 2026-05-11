@@ -2,46 +2,37 @@
 
 import { useState, useCallback, useMemo } from "react";
 
-export type TicketStatus = "new" | "contacted" | "completed" | "archived";
+export type MessageStatus = "new" | "replied" | "archived";
 
-export interface Ticket {
+export interface ContactMessage {
   id: string;
-  student_name: string;
-  grade: string;
-  subjects: string;
-  session_format: string;
-  preferred_times: string | null;
-  parent_name: string;
-  parent_email: string;
-  parent_phone: string;
-  notes: string | null;
-  status: TicketStatus;
+  name: string;
+  email: string;
+  message: string;
+  status: MessageStatus;
   internal_notes: string | null;
-  contacted_at: string | null;
+  replied_at: string | null;
   submitted_at: string;
   updated_at: string;
 }
 
-type FilterTab = "all" | TicketStatus;
+type FilterTab = "all" | MessageStatus;
 
-const STATUS_LABEL: Record<TicketStatus, string> = {
+const STATUS_LABEL: Record<MessageStatus, string> = {
   new: "New",
-  contacted: "Contacted",
-  completed: "Completed",
+  replied: "Replied",
   archived: "Archived",
 };
 
-const STATUS_BADGE: Record<TicketStatus, string> = {
+const STATUS_BADGE: Record<MessageStatus, string> = {
   new: "bg-amber-100 text-amber-700 border-amber-200",
-  contacted: "bg-sky-100 text-sky-700 border-sky-200",
-  completed: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  replied: "bg-emerald-100 text-emerald-700 border-emerald-200",
   archived: "bg-gray-100 text-gray-500 border-gray-200",
 };
 
-const STATUS_DOT: Record<TicketStatus, string> = {
+const STATUS_DOT: Record<MessageStatus, string> = {
   new: "bg-amber-400",
-  contacted: "bg-sky-400",
-  completed: "bg-emerald-500",
+  replied: "bg-emerald-500",
   archived: "bg-gray-300",
 };
 
@@ -67,32 +58,32 @@ function fullDate(iso: string): string {
   });
 }
 
-interface TicketCardProps {
-  ticket: Ticket;
-  onUpdate: (updated: Ticket) => void;
+interface MessageCardProps {
+  message: ContactMessage;
+  onUpdate: (updated: ContactMessage) => void;
 }
 
-function TicketCard({ ticket, onUpdate }: TicketCardProps) {
+function MessageCard({ message, onUpdate }: MessageCardProps) {
   const [loading, setLoading] = useState<string | null>(null);
   const [patchError, setPatchError] = useState("");
-  const [notes, setNotes] = useState(ticket.internal_notes ?? "");
+  const [notes, setNotes] = useState(message.internal_notes ?? "");
   const [savingNotes, setSavingNotes] = useState(false);
   const [notesSaved, setNotesSaved] = useState(false);
   const [notesError, setNotesError] = useState("");
-  const [expanded, setExpanded] = useState(ticket.status === "new");
+  const [expanded, setExpanded] = useState(message.status === "new");
 
   const patch = useCallback(
     async (payload: Record<string, unknown>, label: string) => {
       setLoading(label);
       setPatchError("");
       try {
-        const res = await fetch(`/api/admin/tickets/${ticket.id}`, {
+        const res = await fetch(`/api/admin/messages/${message.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
         if (res.ok) {
-          const updated: Ticket = await res.json();
+          const updated: ContactMessage = await res.json();
           onUpdate(updated);
         } else {
           const data = await res.json().catch(() => ({}));
@@ -104,7 +95,7 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
         setLoading(null);
       }
     },
-    [ticket.id, onUpdate]
+    [message.id, onUpdate]
   );
 
   const saveNotes = async () => {
@@ -112,13 +103,13 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
     setNotesSaved(false);
     setNotesError("");
     try {
-      const res = await fetch(`/api/admin/tickets/${ticket.id}`, {
+      const res = await fetch(`/api/admin/messages/${message.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ internal_notes: notes }),
       });
       if (res.ok) {
-        const updated: Ticket = await res.json();
+        const updated: ContactMessage = await res.json();
         onUpdate(updated);
         setNotesSaved(true);
         setTimeout(() => setNotesSaved(false), 2000);
@@ -133,8 +124,9 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
     }
   };
 
-  const { status } = ticket;
+  const { status } = message;
   const isBusy = loading !== null || savingNotes;
+  const preview = message.message.length > 120 ? message.message.slice(0, 120) + "…" : message.message;
 
   return (
     <div
@@ -146,82 +138,43 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
           : "border-gray-200"
       }`}
     >
-      <button
-        onClick={() => setExpanded((v) => !v)}
-        className="w-full text-left p-4 sm:p-5"
-      >
+      <button onClick={() => setExpanded((v) => !v)} className="w-full text-left p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 flex-wrap">
-            <span
-              className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[status]}`}
-            >
+            <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATUS_BADGE[status]}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status]}`} />
               {STATUS_LABEL[status]}
             </span>
-            <span className="font-semibold text-gray-900 text-sm">
-              {ticket.parent_name}
-            </span>
-            <span className="text-gray-400 text-xs hidden sm:inline">→</span>
-            <span className="text-gray-600 text-sm hidden sm:inline">
-              {ticket.student_name} · Gr.{ticket.grade}
-            </span>
+            <span className="font-semibold text-gray-900 text-sm">{message.name}</span>
+            <span className="text-gray-400 text-xs hidden sm:inline">·</span>
+            <span className="text-gray-600 text-sm hidden sm:inline break-all">{message.email}</span>
           </div>
           <span className="shrink-0 text-xs text-gray-400 whitespace-nowrap">
-            {relativeTime(ticket.submitted_at)}
+            {relativeTime(message.submitted_at)}
           </span>
         </div>
-        <div className="mt-1.5 text-xs text-gray-500 flex flex-wrap gap-x-3 gap-y-0.5">
-          <span>{ticket.subjects}</span>
-          <span>·</span>
-          <span>{ticket.session_format}</span>
-          <span className="sm:hidden">· {ticket.student_name}, Gr.{ticket.grade}</span>
-        </div>
+        <p className="mt-1.5 text-xs text-gray-500 line-clamp-1">{preview}</p>
       </button>
 
       {expanded && (
         <div className="px-4 sm:px-5 pb-5 border-t border-gray-100 pt-4 space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Parent / Guardian
-              </p>
-              <p className="font-medium text-gray-900">{ticket.parent_name}</p>
-              <a href={`tel:${ticket.parent_phone}`} className="text-sky-600 hover:underline block">
-                {ticket.parent_phone}
-              </a>
-              <a href={`mailto:${ticket.parent_email}`} className="text-sky-600 hover:underline block break-all">
-                {ticket.parent_email}
-              </a>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Student
-              </p>
-              <p className="font-medium text-gray-900">{ticket.student_name}</p>
-              <p className="text-gray-600">Grade {ticket.grade}</p>
-              <p className="text-gray-600">{ticket.subjects}</p>
-              <p className="text-gray-600">{ticket.session_format}</p>
-              {ticket.preferred_times && (
-                <p className="text-gray-500 text-xs mt-1">{ticket.preferred_times}</p>
-              )}
-            </div>
+          <div className="text-sm">
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">From</p>
+            <p className="font-medium text-gray-900">{message.name}</p>
+            <a href={`mailto:${message.email}`} className="text-sky-600 hover:underline break-all">
+              {message.email}
+            </a>
           </div>
 
-          {ticket.notes && (
-            <div>
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
-                Notes from client
-              </p>
-              <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">
-                {ticket.notes}
-              </p>
-            </div>
-          )}
+          <div>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Message</p>
+            <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">
+              {message.message}
+            </p>
+          </div>
 
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">
-              Internal notes
-            </p>
+            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Internal notes</p>
             <textarea
               value={notes}
               onChange={(e) => {
@@ -234,18 +187,14 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
               className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
             />
             <div className="flex items-center gap-2 mt-1.5">
-              <button
-                onClick={saveNotes}
-                disabled={isBusy}
-                className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-50"
-              >
+              <button onClick={saveNotes} disabled={isBusy} className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-50">
                 {savingNotes ? "Saving…" : notesSaved ? "✓ Saved" : "Save notes"}
               </button>
               {notesError && <span className="text-xs text-red-600">{notesError}</span>}
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">Submitted {fullDate(ticket.submitted_at)}</p>
+          <p className="text-xs text-gray-400">Submitted {fullDate(message.submitted_at)}</p>
 
           {patchError && (
             <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -256,21 +205,14 @@ function TicketCard({ ticket, onUpdate }: TicketCardProps) {
           <div className="flex flex-wrap gap-2 pt-1">
             {status === "new" && (
               <>
-                <ActionButton label="Mark Contacted" busy={loading === "contacted"} disabled={isBusy} color="sky" onClick={() => patch({ status: "contacted" }, "contacted")} />
-                <ActionButton label="Mark Complete" busy={loading === "completed"} disabled={isBusy} color="emerald" onClick={() => patch({ status: "completed" }, "completed")} />
+                <ActionButton label="Mark Replied" busy={loading === "replied"} disabled={isBusy} color="emerald" onClick={() => patch({ status: "replied" }, "replied")} />
                 <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} color="gray" onClick={() => patch({ status: "archived" }, "archived")} />
               </>
             )}
-            {status === "contacted" && (
-              <>
-                <ActionButton label="Mark Complete" busy={loading === "completed"} disabled={isBusy} color="emerald" onClick={() => patch({ status: "completed" }, "completed")} />
-                <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} color="gray" onClick={() => patch({ status: "archived" }, "archived")} />
-              </>
-            )}
-            {status === "completed" && (
+            {status === "replied" && (
               <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} color="gray" onClick={() => patch({ status: "archived" }, "archived")} />
             )}
-            {(status === "archived" || status === "completed") && (
+            {(status === "archived" || status === "replied") && (
               <ActionButton label="Reopen" busy={loading === "new"} disabled={isBusy} color="amber" onClick={() => patch({ status: "new" }, "new")} />
             )}
           </div>
@@ -284,12 +226,11 @@ interface ActionButtonProps {
   label: string;
   busy: boolean;
   disabled: boolean;
-  color: "sky" | "emerald" | "gray" | "amber";
+  color: "emerald" | "gray" | "amber";
   onClick: () => void;
 }
 
 const COLOR_MAP: Record<string, string> = {
-  sky: "bg-sky-600 hover:bg-sky-700 text-white",
   emerald: "bg-emerald-600 hover:bg-emerald-700 text-white",
   gray: "bg-gray-100 hover:bg-gray-200 text-gray-700",
   amber: "bg-amber-500 hover:bg-amber-600 text-white",
@@ -307,55 +248,50 @@ function ActionButton({ label, busy, disabled, color, onClick }: ActionButtonPro
   );
 }
 
-function matchesTicket(t: Ticket, q: string): boolean {
+function matchesMessage(m: ContactMessage, q: string): boolean {
   if (!q) return true;
   const needle = q.toLowerCase();
   return (
-    t.parent_name.toLowerCase().includes(needle) ||
-    t.student_name.toLowerCase().includes(needle) ||
-    t.parent_email.toLowerCase().includes(needle) ||
-    t.parent_phone.toLowerCase().includes(needle) ||
-    t.subjects.toLowerCase().includes(needle) ||
-    (t.notes ?? "").toLowerCase().includes(needle) ||
-    (t.internal_notes ?? "").toLowerCase().includes(needle)
+    m.name.toLowerCase().includes(needle) ||
+    m.email.toLowerCase().includes(needle) ||
+    m.message.toLowerCase().includes(needle) ||
+    (m.internal_notes ?? "").toLowerCase().includes(needle)
   );
 }
 
-interface TicketsPanelProps {
-  tickets: Ticket[];
+interface MessagesPanelProps {
+  messages: ContactMessage[];
   search: string;
-  onTicketsChange: (next: Ticket[]) => void;
+  onMessagesChange: (next: ContactMessage[]) => void;
 }
 
-export function TicketsPanel({ tickets, search, onTicketsChange }: TicketsPanelProps) {
+export function MessagesPanel({ messages, search, onMessagesChange }: MessagesPanelProps) {
   const [filter, setFilter] = useState<FilterTab>("all");
 
   const handleUpdate = useCallback(
-    (updated: Ticket) => {
-      onTicketsChange(tickets.map((t) => (t.id === updated.id ? updated : t)));
+    (updated: ContactMessage) => {
+      onMessagesChange(messages.map((m) => (m.id === updated.id ? updated : m)));
     },
-    [tickets, onTicketsChange]
+    [messages, onMessagesChange]
   );
 
   const counts: Record<FilterTab, number> = {
-    all: tickets.length,
-    new: tickets.filter((t) => t.status === "new").length,
-    contacted: tickets.filter((t) => t.status === "contacted").length,
-    completed: tickets.filter((t) => t.status === "completed").length,
-    archived: tickets.filter((t) => t.status === "archived").length,
+    all: messages.length,
+    new: messages.filter((m) => m.status === "new").length,
+    replied: messages.filter((m) => m.status === "replied").length,
+    archived: messages.filter((m) => m.status === "archived").length,
   };
 
-  const byStatus = filter === "all" ? tickets : tickets.filter((t) => t.status === filter);
+  const byStatus = filter === "all" ? messages : messages.filter((m) => m.status === filter);
   const visible = useMemo(
-    () => byStatus.filter((t) => matchesTicket(t, search)),
+    () => byStatus.filter((m) => matchesMessage(m, search)),
     [byStatus, search]
   );
 
   const tabs: { id: FilterTab; label: string }[] = [
     { id: "all", label: "All" },
     { id: "new", label: "New" },
-    { id: "contacted", label: "Contacted" },
-    { id: "completed", label: "Completed" },
+    { id: "replied", label: "Replied" },
     { id: "archived", label: "Archived" },
   ];
 
@@ -395,13 +331,13 @@ export function TicketsPanel({ tickets, search, onTicketsChange }: TicketsPanelP
           {search
             ? "No matches."
             : filter === "all"
-            ? "No submissions yet."
-            : `No ${STATUS_LABEL[filter as TicketStatus]?.toLowerCase()} tickets.`}
+            ? "No messages yet."
+            : `No ${STATUS_LABEL[filter as MessageStatus]?.toLowerCase()} messages.`}
         </div>
       ) : (
         <div className="space-y-3">
-          {visible.map((ticket) => (
-            <TicketCard key={ticket.id} ticket={ticket} onUpdate={handleUpdate} />
+          {visible.map((m) => (
+            <MessageCard key={m.id} message={m} onUpdate={handleUpdate} />
           ))}
         </div>
       )}

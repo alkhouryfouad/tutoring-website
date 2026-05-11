@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { validateTicketInput } from "@/lib/validation";
-import { notifyNewTicket } from "@/lib/notify";
+import { validateContactMessageInput } from "@/lib/validation";
+import { notifyNewMessage } from "@/lib/notify";
 
 export async function POST(request: NextRequest) {
-  // Rate-limit hint: protect with Vercel WAF or upstash-ratelimit in production
   let body: unknown;
   try {
     body = await request.json();
@@ -21,7 +20,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  const result = validateTicketInput(body);
+  const result = validateContactMessageInput(body);
   if (!result.ok) {
     return NextResponse.json(
       { error: "Validation failed.", fields: result.errors },
@@ -29,17 +28,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { error } = await supabase.from("tickets").insert(result.data);
+  const { error } = await supabase.from("contact_messages").insert(result.data);
   if (error) {
-    console.error("[submit] Supabase insert error:", error.message);
+    console.error("[contact] Supabase insert error:", error.message);
     return NextResponse.json(
-      { error: "Could not save your submission. Please try again." },
+      { error: "Could not save your message. Please try again." },
       { status: 500 }
     );
   }
 
   // Best-effort: don't await — let the response return immediately.
-  void notifyNewTicket(result.data);
+  void notifyNewMessage(result.data);
 
   return NextResponse.json({ ok: true }, { status: 201 });
 }

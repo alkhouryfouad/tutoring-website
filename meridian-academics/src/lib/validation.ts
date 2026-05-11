@@ -3,6 +3,7 @@ const VALID_FORMATS = new Set(["In-Person", "Online", "Either"]);
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[\+]?[\d\s\-\(\)]{7,20}$/;
 const VALID_STATUSES = new Set(["new", "contacted", "completed", "archived"]);
+const VALID_MESSAGE_STATUSES = new Set(["new", "replied", "archived"]);
 
 /** Strip HTML tags and trim whitespace. */
 function sanitize(v: unknown): string {
@@ -95,4 +96,44 @@ export function validateInternalNotes(raw: unknown): string | null {
   const notes = sanitize((raw as Record<string, unknown>).internal_notes);
   if (notes.length > 2000) return null;
   return notes;
+}
+
+export interface ContactMessageInput {
+  name: string;
+  email: string;
+  message: string;
+}
+
+export type ContactMessageValidationResult =
+  | { ok: true; data: ContactMessageInput }
+  | { ok: false; errors: Record<string, string> };
+
+export function validateContactMessageInput(raw: unknown): ContactMessageValidationResult {
+  if (typeof raw !== "object" || raw === null) {
+    return { ok: false, errors: { _form: "Invalid request body." } };
+  }
+  const r = raw as Record<string, unknown>;
+  const errors: Record<string, string> = {};
+
+  const name = sanitize(r.name);
+  if (!name) errors.name = "Your name is required.";
+  else if (name.length > 100) errors.name = "Name is too long.";
+
+  const email = sanitize(r.email).toLowerCase();
+  if (!email || !EMAIL_RE.test(email))
+    errors.email = "A valid email address is required.";
+
+  const message = sanitize(r.message);
+  if (!message) errors.message = "Please include a message.";
+  else if (message.length > 2000) errors.message = "Message is too long.";
+
+  if (Object.keys(errors).length > 0) return { ok: false, errors };
+
+  return { ok: true, data: { name, email, message } };
+}
+
+export function validateMessageStatusUpdate(raw: unknown): string | null {
+  if (typeof raw !== "object" || raw === null) return null;
+  const status = String((raw as Record<string, unknown>).status ?? "").trim();
+  return VALID_MESSAGE_STATUSES.has(status) ? status : null;
 }
