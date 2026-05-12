@@ -189,6 +189,13 @@ export default function ContactSimple() {
                 >
                   {status === "submitting" ? "Sending…" : "Send message"}
                 </button>
+
+                <p className="text-[11px] text-charcoal-700/70 text-center leading-relaxed">
+                  We only use this to reply.{" "}
+                  <a href="/privacy" className="underline hover:text-forest-600 transition-colors">
+                    Privacy
+                  </a>.
+                </p>
               </form>
             </FadeIn>
           </div>

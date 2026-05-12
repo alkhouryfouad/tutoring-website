@@ -73,7 +73,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 pt-8 border-t border-forest-600">
           <p className="text-sm text-cream-300 text-center">
-            &copy; 2026 Meridian Academics. Oakville, Ontario.
+            &copy; 2026 Meridian Academics. Oakville, Ontario. ·{" "}
+            <a href="/privacy" className="hover:text-white transition-colors">
+              Privacy
+            </a>
           </p>
           <p className="mt-2 text-xs text-forest-400 text-center">
             Proudly serving students at Loyola CSS, Abbey Park HS, Iroquois Ridge HS, and across Oakville.

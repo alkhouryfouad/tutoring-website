@@ -2,9 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { validateTicketInput } from "@/lib/validation";
 import { notifyNewTicket } from "@/lib/notify";
+import { checkRate } from "@/lib/rate-limit";
+
+const RATE = { key: "submit", max: 5, windowMs: 60 * 60 * 1000 }; // 5 per IP per hour
 
 export async function POST(request: NextRequest) {
-  // Rate-limit hint: protect with Vercel WAF or upstash-ratelimit in production
   let body: unknown;
   try {
     body = await request.json();
@@ -12,13 +14,21 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON." }, { status: 400 });
   }
 
-  // Silently discard honeypot-filled submissions (bots)
+  // Silently discard honeypot-filled submissions (bots) — don't telegraph the rate limit
   if (
     typeof body === "object" &&
     body !== null &&
     (body as Record<string, unknown>)._gotcha
   ) {
     return NextResponse.json({ ok: true });
+  }
+
+  const rate = checkRate(request, RATE);
+  if (!rate.ok) {
+    return NextResponse.json(
+      { error: "Too many submissions from this connection. Please try again shortly." },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfter) } }
+    );
   }
 
   const result = validateTicketInput(body);

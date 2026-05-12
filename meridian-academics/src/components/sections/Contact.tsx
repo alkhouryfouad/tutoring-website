@@ -344,6 +344,13 @@ export default function Contact() {
             >
               {status === "submitting" ? "Sending…" : "Book My Free Consultation"}
             </button>
+
+            <p className="text-xs text-charcoal-700/70 text-center leading-relaxed">
+              We use your details only to contact you about tutoring — never sold or shared.{" "}
+              <a href="/privacy" className="underline hover:text-forest-600 transition-colors">
+                Privacy details
+              </a>.
+            </p>
           </form>
         </FadeIn>
       </div>

@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { validateContactMessageInput } from "@/lib/validation";
 import { notifyNewMessage } from "@/lib/notify";
+import { checkRate } from "@/lib/rate-limit";
+
+const RATE = { key: "contact", max: 10, windowMs: 60 * 60 * 1000 }; // 10 per IP per hour
 
 export async function POST(request: NextRequest) {
   let body: unknown;
@@ -18,6 +21,14 @@ export async function POST(request: NextRequest) {
     (body as Record<string, unknown>)._gotcha
   ) {
     return NextResponse.json({ ok: true });
+  }
+
+  const rate = checkRate(request, RATE);
+  if (!rate.ok) {
+    return NextResponse.json(
+      { error: "Too many messages from this connection. Please try again shortly." },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfter) } }
+    );
   }
 
   const result = validateContactMessageInput(body);
