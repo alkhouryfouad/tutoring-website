@@ -16,7 +16,7 @@ export const tutors: Tutor[] = [
     year: "2nd Year",
     average: "97%",
     subjects: ["MHF4U", "MCV4U", "SCH4U", "SCH3U", "MCR3U", "MPM2D", "MTH1W", "SNC1W", "SNC2D"],
-    bio: "Founded Meridian after watching classmates struggle through courses he'd already mastered. Now studying Biomedical Sciences at Guelph, he brings first-hand knowledge of every Ontario math and science course.",
+    bio: "Started Meridian after helping classmates through the same courses he aced. Knows the Ontario math and science curriculum inside out.",
   },
   {
     name: "Murtadha",
@@ -25,15 +25,15 @@ export const tutors: Tutor[] = [
     year: "2nd Year",
     average: "97%",
     subjects: ["SPH4U", "SPH3U", "MHF4U", "MCV4U", "MCR3U", "MPM2D", "FSF4U", "FSF3U", "FSF2D", "FSF1D"],
-    bio: "Specializes in physics, advanced math, and French. Brings an engineer's precision to problem-solving and knows how to make difficult concepts click.",
+    bio: "Teaches physics, advanced math, and French. Breaks tough problems into clear, step-by-step explanations.",
   },
   {
     name: "Sarah",
     university: "Western University — Ivey Business School",
-    program: "HBA (Honours Business Administration)",
+    program: "HBA",
     year: "3rd Year",
     average: "98%",
     subjects: ["BAF3M", "BAT4M", "CIE3M", "CIA4U"],
-    bio: "Top of her class through Ontario's business stream, now in the Ivey HBA program. Teaches accounting and economics with a focus on case-based learning and exam strategy.",
+    bio: "An Ivey HBA student who teaches accounting and economics through case-based examples and clear exam strategy.",
   },
 ];
