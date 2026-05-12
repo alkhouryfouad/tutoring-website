@@ -25,15 +25,15 @@ const STATUS_LABEL: Record<MessageStatus, string> = {
 };
 
 const STATUS_BADGE: Record<MessageStatus, string> = {
-  new: "bg-amber-100 text-amber-700 border-amber-200",
-  replied: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  archived: "bg-gray-100 text-gray-500 border-gray-200",
+  new: "bg-amber-400/20 border-amber-400/40 text-charcoal-900",
+  replied: "bg-forest-600/15 border-forest-600/30 text-forest-700",
+  archived: "bg-cream-200 border-cream-300 text-charcoal-700",
 };
 
 const STATUS_DOT: Record<MessageStatus, string> = {
   new: "bg-amber-400",
-  replied: "bg-emerald-500",
-  archived: "bg-gray-300",
+  replied: "bg-forest-600",
+  archived: "bg-cream-300",
 };
 
 function relativeTime(iso: string): string {
@@ -130,12 +130,12 @@ function MessageCard({ message, onUpdate }: MessageCardProps) {
 
   return (
     <div
-      className={`bg-white rounded-2xl border transition-shadow ${
+      className={`bg-cream-50 rounded-2xl border transition-shadow ${
         status === "new"
-          ? "border-amber-200 shadow-sm"
+          ? "border-amber-400/40 shadow-sm"
           : status === "archived"
-          ? "border-gray-200 opacity-60"
-          : "border-gray-200"
+          ? "border-cream-300 opacity-60"
+          : "border-cream-300"
       }`}
     >
       <button onClick={() => setExpanded((v) => !v)} className="w-full text-left p-4 sm:p-5">
@@ -145,36 +145,36 @@ function MessageCard({ message, onUpdate }: MessageCardProps) {
               <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status]}`} />
               {STATUS_LABEL[status]}
             </span>
-            <span className="font-semibold text-gray-900 text-sm">{message.name}</span>
-            <span className="text-gray-400 text-xs hidden sm:inline">·</span>
-            <span className="text-gray-600 text-sm hidden sm:inline break-all">{message.email}</span>
+            <span className="font-semibold text-charcoal-900 text-sm">{message.name}</span>
+            <span className="text-charcoal-700/50 text-xs hidden sm:inline">·</span>
+            <span className="text-charcoal-700 text-sm hidden sm:inline break-all">{message.email}</span>
           </div>
-          <span className="shrink-0 text-xs text-gray-400 whitespace-nowrap">
+          <span className="shrink-0 text-xs text-charcoal-700/60 whitespace-nowrap">
             {relativeTime(message.submitted_at)}
           </span>
         </div>
-        <p className="mt-1.5 text-xs text-gray-500 line-clamp-1">{preview}</p>
+        <p className="mt-1.5 text-xs text-charcoal-700 line-clamp-1">{preview}</p>
       </button>
 
       {expanded && (
-        <div className="px-4 sm:px-5 pb-5 border-t border-gray-100 pt-4 space-y-5">
+        <div className="px-4 sm:px-5 pb-5 border-t border-cream-200 pt-4 space-y-5">
           <div className="text-sm">
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">From</p>
-            <p className="font-medium text-gray-900">{message.name}</p>
-            <a href={`mailto:${message.email}`} className="text-sky-600 hover:underline break-all">
+            <p className="text-xs font-medium text-charcoal-700/60 uppercase tracking-wide mb-1">From</p>
+            <p className="font-medium text-charcoal-900">{message.name}</p>
+            <a href={`mailto:${message.email}`} className="text-forest-600 hover:underline break-all">
               {message.email}
             </a>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">Message</p>
-            <p className="text-sm text-gray-700 bg-gray-50 rounded-lg p-3 whitespace-pre-wrap">
+            <p className="text-xs font-medium text-charcoal-700/60 uppercase tracking-wide mb-1">Message</p>
+            <p className="text-sm text-charcoal-900 bg-cream-100 rounded-lg p-3 whitespace-pre-wrap">
               {message.message}
             </p>
           </div>
 
           <div>
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Internal notes</p>
+            <p className="text-xs font-medium text-charcoal-700/60 uppercase tracking-wide mb-1.5">Internal notes</p>
             <textarea
               value={notes}
               onChange={(e) => {
@@ -184,17 +184,17 @@ function MessageCard({ message, onUpdate }: MessageCardProps) {
               }}
               rows={3}
               placeholder="Add your follow-up notes here…"
-              className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none"
+              className="w-full rounded-lg border border-cream-300 bg-white px-3 py-2 text-sm text-charcoal-900 placeholder:text-charcoal-700/50 focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent resize-none"
             />
             <div className="flex items-center gap-2 mt-1.5">
-              <button onClick={saveNotes} disabled={isBusy} className="text-xs font-medium text-emerald-700 hover:text-emerald-800 disabled:opacity-50">
+              <button onClick={saveNotes} disabled={isBusy} className="text-xs font-medium text-forest-600 hover:text-forest-500 disabled:opacity-50">
                 {savingNotes ? "Saving…" : notesSaved ? "✓ Saved" : "Save notes"}
               </button>
               {notesError && <span className="text-xs text-red-600">{notesError}</span>}
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">Submitted {fullDate(message.submitted_at)}</p>
+          <p className="text-xs text-charcoal-700/60">Submitted {fullDate(message.submitted_at)}</p>
 
           {patchError && (
             <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
@@ -205,15 +205,15 @@ function MessageCard({ message, onUpdate }: MessageCardProps) {
           <div className="flex flex-wrap gap-2 pt-1">
             {status === "new" && (
               <>
-                <ActionButton label="Mark Replied" busy={loading === "replied"} disabled={isBusy} color="emerald" onClick={() => patch({ status: "replied" }, "replied")} />
-                <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} color="gray" onClick={() => patch({ status: "archived" }, "archived")} />
+                <ActionButton label="Mark Replied" busy={loading === "replied"} disabled={isBusy} variant="strong" onClick={() => patch({ status: "replied" }, "replied")} />
+                <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} variant="neutral" onClick={() => patch({ status: "archived" }, "archived")} />
               </>
             )}
             {status === "replied" && (
-              <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} color="gray" onClick={() => patch({ status: "archived" }, "archived")} />
+              <ActionButton label="Archive" busy={loading === "archived"} disabled={isBusy} variant="neutral" onClick={() => patch({ status: "archived" }, "archived")} />
             )}
             {(status === "archived" || status === "replied") && (
-              <ActionButton label="Reopen" busy={loading === "new"} disabled={isBusy} color="amber" onClick={() => patch({ status: "new" }, "new")} />
+              <ActionButton label="Reopen" busy={loading === "new"} disabled={isBusy} variant="accent" onClick={() => patch({ status: "new" }, "new")} />
             )}
           </div>
         </div>
@@ -222,26 +222,28 @@ function MessageCard({ message, onUpdate }: MessageCardProps) {
   );
 }
 
+type Variant = "strong" | "neutral" | "accent";
+
 interface ActionButtonProps {
   label: string;
   busy: boolean;
   disabled: boolean;
-  color: "emerald" | "gray" | "amber";
+  variant: Variant;
   onClick: () => void;
 }
 
-const COLOR_MAP: Record<string, string> = {
-  emerald: "bg-emerald-600 hover:bg-emerald-700 text-white",
-  gray: "bg-gray-100 hover:bg-gray-200 text-gray-700",
-  amber: "bg-amber-500 hover:bg-amber-600 text-white",
+const VARIANT_CLASS: Record<Variant, string> = {
+  strong: "bg-forest-600 hover:bg-forest-500 text-white",
+  neutral: "bg-cream-200 hover:bg-cream-300 text-charcoal-900",
+  accent: "bg-amber-400 hover:bg-amber-500 text-charcoal-900",
 };
 
-function ActionButton({ label, busy, disabled, color, onClick }: ActionButtonProps) {
+function ActionButton({ label, busy, disabled, variant, onClick }: ActionButtonProps) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${COLOR_MAP[color]}`}
+      className={`rounded-lg px-3.5 py-2 text-xs font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${VARIANT_CLASS[variant]}`}
     >
       {busy ? "…" : label}
     </button>
@@ -297,21 +299,21 @@ export function MessagesPanel({ messages, search, onMessagesChange }: MessagesPa
 
   return (
     <div>
-      <div className="flex gap-1 bg-white border border-gray-200 rounded-xl p-1 mb-4 overflow-x-auto">
+      <div className="flex gap-1 bg-cream-50 border border-cream-300 rounded-xl p-1 mb-4 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setFilter(tab.id)}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors ${
               filter === tab.id
-                ? "bg-[#1B4332] text-white shadow-sm"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                ? "bg-forest-600 text-white shadow-sm"
+                : "text-charcoal-700 hover:text-charcoal-900 hover:bg-cream-100"
             }`}
           >
             {tab.label}
             <span
               className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                filter === tab.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"
+                filter === tab.id ? "bg-white/20 text-white" : "bg-cream-200 text-charcoal-700"
               }`}
             >
               {counts[tab.id]}
@@ -321,13 +323,13 @@ export function MessagesPanel({ messages, search, onMessagesChange }: MessagesPa
       </div>
 
       {search && (
-        <p className="text-xs text-gray-500 mb-3">
+        <p className="text-xs text-charcoal-700 mb-3">
           {visible.length} of {byStatus.length} match &ldquo;{search}&rdquo;
         </p>
       )}
 
       {visible.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 text-sm">
+        <div className="text-center py-16 text-charcoal-700/60 text-sm font-serif">
           {search
             ? "No matches."
             : filter === "all"

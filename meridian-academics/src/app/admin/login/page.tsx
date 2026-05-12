@@ -37,18 +37,18 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-cream-100 flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <p className="font-serif font-semibold text-2xl text-[#1B4332]">
+          <p className="font-serif font-semibold text-2xl text-forest-600">
             Meridian Academics
           </p>
-          <p className="text-sm text-gray-500 mt-1">Internal Admin</p>
+          <p className="text-sm text-charcoal-700 mt-1">Internal Admin</p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 space-y-5"
+          className="bg-cream-50 rounded-2xl border border-cream-300 shadow-sm p-8 space-y-5"
         >
           {error && (
             <div className="rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-700">
@@ -59,7 +59,7 @@ export default function AdminLogin() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1.5"
+              className="block text-sm font-medium text-charcoal-800 mb-1.5"
             >
               Admin password
             </label>
@@ -71,7 +71,7 @@ export default function AdminLogin() {
               required
               autoFocus
               autoComplete="current-password"
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#1B4332] focus:border-transparent"
+              className="w-full rounded-lg border border-cream-300 bg-white px-4 py-2.5 text-sm text-charcoal-900 focus:outline-none focus:ring-2 focus:ring-forest-600 focus:border-transparent"
               placeholder="Enter password"
             />
           </div>
@@ -79,7 +79,7 @@ export default function AdminLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-[#1B4332] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#2D6A4F] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full rounded-lg bg-forest-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-forest-500 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {loading ? "Signing in…" : "Sign in"}
           </button>
